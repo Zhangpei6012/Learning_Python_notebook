@@ -240,3 +240,81 @@ print()
 print('The number of pairs (f, l) such that f and l are the first and last digits\n'
       f'of members of L is maximal for (f, l) one of {sorted(first_and_last)}.'
      )
+
+
+#quiz3
+
+# Uses Global Temperature Time Series, avalaible at
+# http://data.okfn.org/data/core/global-temp, stored in the file monthly_csv.csv,
+# assumed to be stored in the working directory.
+# Prompts the user for the source, a year or a range of years, and a month.
+# - The source is either GCAG or GISTEMP.
+# - The range of years is of the form xxxx -- xxxx (with any number of spaces,
+#   possibly none, around --) and both years can be the same,
+#   or the first year can be anterior to the second year,
+#   or the first year can be posterior to the first year.
+# We assume that the input is correct and the data for the requested month
+# exist for all years in the requested range.
+# Then outputs:
+# - The average of the values for that source, for this month, for those years.
+# - The list of years (in increasing order) for which the value is larger than that average.
+#
+# Written by *** and Eric Martin for COMP9021
+
+
+import sys
+import os
+import csv
+import datetime
+from collections import defaultdict
+
+
+filename = 'monthly_csv.csv'
+if not os.path.exists(filename):
+    print(f'There is no file named {filename} in the working directory, giving up...')
+    sys.exit()
+
+source = input('Enter the source (GCAG or GISTEMP): ')
+year_or_range_of_years = input('Enter a year or a range of years in the form XXXX -- XXXX: ')
+month = input('Enter a month: ')
+average = 0
+years_above_average = []
+
+# REPLACE THIS COMMENT WITH YOUR CODE
+time_list = []
+def nums_to_english(time):
+    try:
+        time_format = datetime.datetime.strptime(time, '%Y/%m/%d')
+    except ValueError:
+        time_format = datetime.datetime.strptime(time, '%Y-%m-%d')
+    time_format = time_format.strftime('%Y/%B/%d')
+    return time_format
+
+year_or_range_of_years = ''.join(year_or_range_of_years.split()) #del space
+year_or_range_of_years = [int(x) for x in year_or_range_of_years.split('--',1)]
+year_or_range_of_years.sort()
+
+dir_year_nums = defaultdict(list)
+
+with open('monthly_csv.csv') as file:
+    csv_file = csv.reader(file)
+    for source_name, date_time, mean_nums in csv_file:
+        if str(source_name) == source:
+            time_format = nums_to_english(str(date_time))
+            time_list = [x for x in time_format.split('/')]
+            if time_list[1] == str(month):
+                if len(year_or_range_of_years) == 1 and int(time_list[0])== year_or_range_of_years[0]:
+                    dir_year_nums[int(time_list[0])].append(float(mean_nums))
+                    time_list.clear()
+                elif len(year_or_range_of_years) == 2 and year_or_range_of_years[1]>= int(time_list[0]) >= year_or_range_of_years[0]:
+                    dir_year_nums[int(time_list[0])].append(float(mean_nums))
+                    time_list.clear()
+
+sum_mean = sum(dir_year_nums[key][0] for key in dir_year_nums)
+average = sum_mean / len(dir_year_nums)
+years_above_average = [key for key in dir_year_nums if dir_year_nums[key][0] > average]
+years_above_average.sort()
+
+print(f'The average anomaly for {month} in this range of years is: {average:.2f}.')
+print('The list of years when the temperature anomaly was above average is:')
+print(years_above_average)
