@@ -293,6 +293,7 @@ def nums_to_english(time):
 year_or_range_of_years = ''.join(year_or_range_of_years.split()) #del space
 year_or_range_of_years = [int(x) for x in year_or_range_of_years.split('--',1)]
 year_or_range_of_years.sort()
+#year_or_range_of_years.sort()
 
 dir_year_nums = defaultdict(list)
 
@@ -303,13 +304,17 @@ with open('monthly_csv.csv') as file:
             time_format = nums_to_english(str(date_time))
             time_list = [x for x in time_format.split('/')]
             if time_list[1] == str(month):
+                if min(year_or_range_of_years)<= int(time_list[0]) <= max(year_or_range_of_years)
+                    dir_year_nums[int(time_list[0])].append(float(mean_nums))
+                    time_list.clear()
+"""
                 if len(year_or_range_of_years) == 1 and int(time_list[0])== year_or_range_of_years[0]:
                     dir_year_nums[int(time_list[0])].append(float(mean_nums))
                     time_list.clear()
                 elif len(year_or_range_of_years) == 2 and year_or_range_of_years[1]>= int(time_list[0]) >= year_or_range_of_years[0]:
                     dir_year_nums[int(time_list[0])].append(float(mean_nums))
                     time_list.clear()
-
+"""
 sum_mean = sum(dir_year_nums[key][0] for key in dir_year_nums)
 average = sum_mean / len(dir_year_nums)
 years_above_average = [key for key in dir_year_nums if dir_year_nums[key][0] > average]
@@ -318,3 +323,146 @@ years_above_average.sort()
 print(f'The average anomaly for {month} in this range of years is: {average:.2f}.')
 print('The list of years when the temperature anomaly was above average is:')
 print(years_above_average)
+
+
+##quiz4
+# Randomly fills an array of size 10x10 with True and False, and outputs the number of blocks
+# in the largest block construction, determined by rows of True's that can be stacked
+# on top of each other.
+#
+# Written by *** and Eric Martin for COMP9021
+
+
+from random import seed, randrange
+import sys
+
+
+dim = 10
+
+
+def display_grid():
+    for i in range(dim):
+        print('     ', end = '')
+        print(' '.join(f'{int(e)}' for e in grid[i]))
+    print()
+
+def construction_size(i, j1, j2):
+    block1 = 0
+    for m in range(j1, j2 + 1):
+        for n in reversed(range(0,i)):
+            if not grid[n][m]:
+                break
+            else:
+                block1 += 1
+    return (block1)
+
+
+def size_of_largest_construction():
+    largest_size = 0
+    for i in range(len(grid))[::-1]:
+        for j1 in range(len(grid[i])):
+            for j2 in range(j1, len(grid[i])):
+                if all(grid[i][j1:j2+1]):
+                    temp_size = j2 - j1 + 1 + (construction_size(i, j1, j2))
+                    largest_size = max(temp_size, largest_size)
+                    temp_size = 0
+    return (largest_size)
+# If j1 <= j2 and the grid has a 1 at the intersection of row i and column j
+# for all j in {j1, ..., j2}, then returns the number of blocks in the construction
+# built over this line of blocks.
+
+
+
+
+
+
+try:
+    for_seed, n = input('Enter two integers, the second one being strictly positive: ').split()
+    for_seed = int(for_seed)
+    n = int(n)
+    if n <= 0:
+        raise ValueError
+except ValueError:
+    print('Incorrect input, giving up.')
+    sys.exit()
+
+seed(for_seed)
+grid = [[bool(randrange(n)) for _ in range(dim)] for _ in range(dim)]
+print('Here is the grid that has been generated:')
+display_grid()
+size = size_of_largest_construction()
+if not size:
+    print(f'The largest block construction has no block.')
+elif size == 1:
+    print(f'The largest block construction has 1 block.')
+else:
+    print(f'The largest block construction has {size_of_largest_construction()} blocks.')
+
+##quiz5
+ # Prompts the user for a nonnegative integer that codes a set S as follows:
+# - Bit 0 codes 0
+# - Bit 1 codes -1
+# - Bit 2 codes 1
+# - Bit 3 codes -2
+# - Bit 4 codes 2
+# - Bit 5 codes -3
+# - Bit 6 codes 3
+# ...
+# Computes a derived nonnegative number that codes the set of running sums
+# of the members of S when those are listed in increasing order.
+#
+# Computes the ordered list of members of a coded set.
+#
+# Written by *** and Eric Martin for COMP9021
+
+
+import sys
+
+try:
+    encoded_set = int(input('Input a nonnegative integer: '))
+    if encoded_set < 0:
+        raise ValueError
+except ValueError:
+    print('Incorrect input, giving up.')
+    sys.exit()
+
+def display(L):
+    print('{', end = '')
+    print(', '.join(str(e) for e in L), end = '')
+    print('}')
+
+def decode(encoded_set):
+    i = 0
+    list1 = []
+    while i <= len(bin(encoded_set)):
+        if bin(encoded_set|1 << i) == bin(encoded_set):
+            if i % 2 == 0:
+                list1.append(int(i/2))
+            else:
+                list1.append(int(-(i+1)/2))
+        i += 1
+    list1.sort()
+    return list1
+
+def code_derived_set(encoded_set):
+    i = 0
+    list2 = decode(encoded_set)
+    list3 = []
+    nums = 0
+    if len(list2) != 0:
+        while i <= len(list2):
+            list3.append(sum(list2[:i+1]))
+            i += 1
+        list3 = sorted(set(list3))
+        for x in list3:
+            if x >= 0 :
+                nums = nums|1 << (x * 2)
+            else:
+                nums = nums|1 << abs(x) * 2 - 1
+    return nums
+print('The encoded set is: ', end = '')
+display(decode(encoded_set))
+code_of_derived_set = code_derived_set(encoded_set)
+print('The derived set is encoded as:', code_of_derived_set)
+print('It is: ', end = '')
+display(decode(code_of_derived_set))
