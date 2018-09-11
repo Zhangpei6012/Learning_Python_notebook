@@ -292,7 +292,6 @@ def nums_to_english(time):
 
 year_or_range_of_years = ''.join(year_or_range_of_years.split()) #del space
 year_or_range_of_years = [int(x) for x in year_or_range_of_years.split('--',1)]
-year_or_range_of_years.sort()
 #year_or_range_of_years.sort()
 
 dir_year_nums = defaultdict(list)
@@ -466,3 +465,70 @@ code_of_derived_set = code_derived_set(encoded_set)
 print('The derived set is encoded as:', code_of_derived_set)
 print('It is: ', end = '')
 display(decode(code_of_derived_set))
+
+
+###quiz6
+
+# Randomly fills an array of size 10x10 True and False, displayed as 1 and 0,
+# and outputs the number chess knights needed to jump from 1s to 1s
+# and visit all 1s (they can jump back to locations previously visited).
+#
+# Written by *** and Eric Martin for COMP9021
+
+
+from random import seed, randrange
+import sys
+
+
+dim = 10
+
+
+def display_grid():
+    for i in range(dim):
+        print('     ', end = '')
+        print(' '.join(grid[i][j] and '1' or '0' for j in range(dim)))
+    print()
+
+direction = [[-2 ,-1],[-2 , 1],[-1, 2],[1,2],[2,1],[2,-1],[1,-2],[-1,-2]]
+
+def explore_board(x,y):
+    global name
+    if not (0 <= x < 10 and 0 <= y < 10 ):
+        return
+    if grid[x][y] != 1:
+        return
+    grid[x][y] = 0
+    for i in range(8):
+        explore_board(x+direction[i][0],y+direction[i][1])
+    grid[x][y] = name
+
+try:
+    for_seed, n = (int(i) for i in input('Enter two integers: ').split())
+    if not n:
+        raise ValueError
+except ValueError:
+    print('Incorrect input, giving up.')
+    sys.exit()
+
+seed(for_seed)
+if n > 0:
+    grid = [[randrange(n) > 0 for _ in range(dim)] for _ in range(dim)]
+else:
+    grid = [[randrange(-n) == 0 for _ in range(dim)] for _ in range(dim)]
+print('Here is the grid that has been generated:')
+display_grid()
+
+name = 2
+for i in range(10):
+    for j in range(10):
+        if grid[i][j] == 1:
+            explore_board(i,j)
+            name += 1
+
+nb_of_knights = name - 2
+if not nb_of_knights:
+    print('No chess knight has explored this board.')
+elif nb_of_knights == 1:
+    print(f'At least 1 chess knight has explored this board.')
+else:
+    print(f'At least {nb_of_knights} chess knights have explored this board')
